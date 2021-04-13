@@ -14,6 +14,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/ObjDetectionScene.unity
     guid: 3fb240da9f8933a4b9e72c957e00e610
+  - enabled: 0
+    path: Assets/MRTK/Examples/Demos/HandTracking/Scenes/HandMenuExamples.unity
+    guid: 2792ec9767804e644906ab978f2eed23
   m_configObjects:
     Unity.XR.WindowsMR.Settings: {fileID: 11400000, guid: 419a5c1f8f5d688489d60909859d461f,
       type: 2}

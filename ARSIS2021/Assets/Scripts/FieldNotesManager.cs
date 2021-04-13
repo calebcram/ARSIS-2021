@@ -25,70 +25,92 @@ public class FieldNotesManager : MonoBehaviour
     public ResponseRepository savedResponses;
 
     private bool waitingForPicture = false;
+    private bool waitingForRecording = false; 
 
-    public RawImage test;
+    //public RawImage test;
 
     void Start()
     {
         s = this;
         waitingForPicture = false;
 
-        Question first = new Question("What is the type of the sample?", new string[] { "rock", "regolith" });
+        /* Question first = new Question("What is the type of the sample?", new string[] { "rock", "regolith" });
 
-        Question genSize = new Question("General size", new string[] { "small", "medium", "large" }); 
-        Question genColor = new Question("Color/tone", new string[] { "gray", "red", "black", "light-toned" });
+         Question genSize = new Question("General size", new string[] { "small", "medium", "large" }); 
+         Question genColor = new Question("Color/tone", new string[] { "gray", "red", "black", "light-toned" });
+         Question otherColor = new Question("Other color descriptor", new string[] { "banded", "streaked", "flat", "shiny" });
+         Question texture = new Question("Texture", new string[] { "fine", "medium", "coarse" });
+         Question otherTexture = new Question("Other texture descriptor", new string[] { "vesicular", "glassy", "metallic" });
+         Question durability = new Question("Durability", new string[] { "hard to break", "crumbles" });
+
+         genSize.setNextQuestion(genColor);
+         genColor.setNextQuestion(otherColor);
+         otherColor.setNextQuestion(texture);
+         otherTexture.setNextQuestion(durability); 
+
+         Question genColorReg = new Question("Color/tone", new string[] { "gray", "red", "black", "light-toned" });
+         Question otherColorReg = new Question("Other color descriptor", new string[] { "banded", "streaked", "flat", "shiny" });
+         Question grainSize = new Question("Grain size", new string[] { "fine", "medium", "coarse" });
+         Question grainType = new Question("Grain type", new string[] { "clay", "silt", "sand", "gravel" });
+
+         genColorReg.setNextQuestion(otherColorReg);
+         otherColorReg.setNextQuestion(grainSize); 
+
+         first.setNextQuestions(new Question[] { genColor, genColorReg }); */
+
+        Question first = new Question("Color/tone", new string[] { "gray", "red", "black", "light-toned" });
         Question otherColor = new Question("Other color descriptor", new string[] { "banded", "streaked", "flat", "shiny" });
-        Question texture = new Question("Texture", new string[] { "fine", "medium", "coarse" });
+        Question grainSize = new Question("Grain size", new string[] { "fine", "medium", "coarse" });
         Question otherTexture = new Question("Other texture descriptor", new string[] { "vesicular", "glassy", "metallic" });
         Question durability = new Question("Durability", new string[] { "hard to break", "crumbles" });
 
-        genSize.setNextQuestion(genColor);
-        genColor.setNextQuestion(otherColor);
-        otherColor.setNextQuestion(texture);
+        first.setNextQuestion(otherColor);
+        otherColor.setNextQuestion(grainSize);
+        grainSize.setNextQuestion(otherTexture);
         otherTexture.setNextQuestion(durability); 
-
-        Question genColorReg = new Question("Color/tone", new string[] { "gray", "red", "black", "light-toned" });
-        Question otherColorReg = new Question("Other color descriptor", new string[] { "banded", "streaked", "flat", "shiny" });
-        Question grainSize = new Question("Grain size", new string[] { "fine", "medium", "coarse" });
-        Question grainType = new Question("Grain type", new string[] { "clay", "silt", "sand", "gravel" });
-
-        genColorReg.setNextQuestion(otherColorReg);
-        otherColorReg.setNextQuestion(grainSize); 
-
-        first.setNextQuestions(new Question[] { genColor, genColorReg });
 
         firstQuestion = first;
         currentQuestion = first;
 
+        savedResponses = new ResponseRepository();
+
         LoadFile();
 
-        //VoiceManager.S.captureEvent += confirmationMessage;  
+        VoiceManager.S.captureEvent += confirmationMessage;  
+    }
+
+    public void startFieldNote()
+    {
+        inProgress = true;
+        waitingForPicture = false;
+        waitingForRecording = false; 
+
+        //clear list and get response repo from file - to clear any incomplete entries 
+        LoadFile();
+
+        savedResponses.addResponse();
+
+        //showAudioPrompt(); 
+        showFirstQuestion();
     }
 
     public void showFirstQuestion()
     {
+        currentSelectionIndex = -1;
         currentQuestion = firstQuestion;
-        inProgress = true;
-        waitingForPicture = false;
-
         MenuController.s.m_newFieldNote.GetComponent<FieldNoteDisplay>().setQuestion(currentQuestion.prompt, currentQuestion.options, currentQuestion.variableNextQuestion());
-
-        //clear list and get response repo from file - to clear any incomplete entries 
-        LoadFile(); 
-
-        savedResponses.addResponse(); 
     }
 
     public void nextQuestion()
     {
         waitingForPicture = false;
         if (selectedAnswer == "") return;
-        savedResponses.responses[savedResponses.responses.Count-1].addEntry(currentQuestion.prompt, selectedAnswer); 
+        savedResponses.responses[savedResponses.responses.Count-1].addEntry(currentQuestion.prompt, selectedAnswer);
         if (!currentQuestion.variableNextQuestion())
         {
             if (currentSelectionIndex > currentQuestion.nextQuestions.Length)
             {
-                finalQuestion(); 
+                showAudioPrompt(); 
                 return; 
             } else
             {
@@ -99,7 +121,7 @@ public class FieldNotesManager : MonoBehaviour
         {
             if (currentQuestion.nextQuestion == null)
             {
-                finalQuestion(); 
+                showAudioPrompt(); 
                 return; 
             } else
             {
@@ -121,6 +143,29 @@ public class FieldNotesManager : MonoBehaviour
         // Note: at this point we wait for the capture delegate in VoiceManager to go to the next step, which is confirmationMessage() 
     }
 
+    public void showAudioPrompt()
+    {
+        MenuController.s.m_newFieldNote.GetComponent<FieldNoteDisplay>().displayRecordButton(); 
+    }
+
+    public void toggleRecording()
+    {
+        if (!waitingForRecording)
+        {
+            waitingForRecording = true; 
+            MenuController.s.m_newFieldNote.GetComponent<FieldNoteDisplay>().setRecordButtonText("End"); 
+            MicrophoneRecord.S.startRecording();
+        }
+        else
+        {
+            AudioClip clip = MicrophoneRecord.S.stopRecording();
+            savedResponses.responses[savedResponses.responses.Count - 1].audio = clip;
+            waitingForRecording = false;
+            finalQuestion();  
+        }
+
+    }
+
     public void confirmationMessage()
     {
         if (!waitingForPicture) return;
@@ -128,7 +173,7 @@ public class FieldNotesManager : MonoBehaviour
         Debug.Log("We got to the confirmation message");
 
         Texture picture = MenuController.s.m_newFieldNote.GetComponent<FieldNoteDisplay>().getPicture();
-        test.texture = picture;
+        //test.texture = picture;
         savedResponses.responses[savedResponses.responses.Count - 1].picture = picture;
 
         SaveFile();
@@ -299,7 +344,8 @@ public class Response
 {
     public DateTime date; 
     public List<Entry> entries;
-    public Texture picture; 
+    public Texture picture;
+    public AudioClip audio; 
 
     public Response()
     {

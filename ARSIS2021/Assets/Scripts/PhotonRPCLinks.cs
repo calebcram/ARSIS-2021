@@ -25,6 +25,7 @@ public class PhotonRPCLinks : MonoBehaviourPun
     public float lastHeadsetSendUpdate = 0;
     public enum iconType { ARROW, CIRCLE, RECTANGLE, X };
 
+    public GameObject debugCube; 
 
     // Start is called before the first frame update
     void Start()
@@ -153,6 +154,8 @@ public class PhotonRPCLinks : MonoBehaviourPun
     }
     public void sendCrewMemberLocation(Vector3 pos, Quaternion rot)
     {
+        debugCube.transform.position = pos;
+        debugCube.transform.rotation = rot; 
         PhotonView pv = this.photonView;
         pv.RPC("receiveCrewMemberLocation", RpcTarget.Others, (object)pos, (object)rot);
     }

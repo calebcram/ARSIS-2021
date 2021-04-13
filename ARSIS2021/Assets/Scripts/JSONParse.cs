@@ -85,14 +85,27 @@ public class JSONParse : MonoBehaviour {
     public float m_Rate_SOPLow;
     public float m_Rate_SOPHigh;
 
-    bool weCanQuit = false; 
+    bool weCanQuit = false;
+
+    bool parsingOn = true; 
 
     void Start ()
     {
         m_OutputErrorData = FindObjectOfType<OutputErrorData>();
         //StartCoroutine(RunStartWWW());
         InvokeRepeating("UpdateSystemData", 1, 5);
-        InvokeRepeating("UpdateSystemSwitchData", 2, 3);
+        //InvokeRepeating("UpdateSystemSwitchData", 2, 3);
+    }
+
+    public void toggleParsing()
+    {
+        if (parsingOn)
+        {
+            parsingOn = false; 
+        } else
+        {
+            parsingOn = true; 
+        }
     }
 
     private void OnApplicationQuit ()
@@ -139,6 +152,7 @@ public class JSONParse : MonoBehaviour {
     */
     IEnumerator RunWWW()
     {
+        if (!parsingOn) yield break; ; 
         if (m_bGettingSuitData == true) yield break;
 
         using (UnityWebRequest www = UnityWebRequest.Get(url))
@@ -175,7 +189,7 @@ public class JSONParse : MonoBehaviour {
             {
                 json = json.Substring(1, json.Length - 2);
 
-                SuitData jsonObject = JsonUtility.FromJson<SuitData>(json);
+                SuitData jsonObject = JsonUtility.FromJson<SuitData>(www.downloadHandler.text);
                 //LineData data = new LineData();
 
                 //data.m_DataValue = jsonObject.v_fan;
@@ -187,13 +201,13 @@ public class JSONParse : MonoBehaviour {
 
                 // Get the lesser time between oxygen and battery 
                 string identifier = "";
-                string lesserTime = getLesserTime(jsonObject.t_oxygen, jsonObject.t_battery, out identifier);
+                string lesserTime = getLesserTime(jsonObject.t_oxygen, jsonObject.t_battery, jsonObject.t_water, out identifier);
                 
                 // Display Time Left 
                 timeLeftText.text = "Time Left: " + lesserTime + " (" + identifier + ")";
                 m_bGettingSuitData = false;
 
-                m_BiometricInCautionElement.SetActive(WarningSingleton.m_Singleton.m_DataInWarning);
+                //m_BiometricInCautionElement.SetActive(WarningSingleton.m_Singleton.m_DataInWarning);
 
             }
             else
@@ -227,6 +241,7 @@ public class JSONParse : MonoBehaviour {
         CheckOffNominalRange("H20 Liquid Pressure", data.p_h2o_l, 14.0f, 16.0f, "psia");
         CheckOffNominalRange("SOP Pressure", data.p_sop, 750.0f, 950.0f, "psia");
         CheckOffNominalRange("SOP Rate", data.rate_sop, 0.5f, 1.0f, "psi/min");
+        CheckOffNominalRange("Heart Rate", data.heart_bpm, 80, 100, "bpm");
 
         m_SuitDataUIElements[0].SetData("Internal Suit Pressure", data.p_suit, 2.0f, 4.0f, "psid");
         m_SuitDataUIElements[1].SetData("Time Life Battery", batteryHours, 0.0f, 10.0f, "hours");
@@ -243,6 +258,9 @@ public class JSONParse : MonoBehaviour {
         m_SuitDataUIElements[12].SetData("H20 Liquid Pressure", data.p_h2o_l, 14.0f, 16.0f, "psia");
         m_SuitDataUIElements[13].SetData("SOP Pressure", data.p_sop, 750.0f, 950.0f, "psia");
         m_SuitDataUIElements[14].SetData("SOP Rate", data.rate_sop, 0.5f, 1.0f, "psi/min");
+        m_SuitDataUIElements[15].SetData("Primary Oxygen", data.ox_primary);
+        m_SuitDataUIElements[16].SetData("Secondary Oxygen", data.ox_secondary);
+        m_SuitDataUIElements[17].SetData("Heart Rate", data.heart_bpm,80,100,"bpm");
     }
 
     private void CheckOffNominalRange(string dataTitle, float dataValue, float lower, float upper, string unit)
@@ -250,6 +268,9 @@ public class JSONParse : MonoBehaviour {
         if (dataValue > upper || dataValue < lower)
         {
             WarningSingleton.m_Singleton.BiometricInWarning(dataTitle);
+        } else
+        {
+            WarningSingleton.m_Singleton.BiometricInNominal(dataTitle); 
         }
     }
 
@@ -275,18 +296,21 @@ public class JSONParse : MonoBehaviour {
         m_SuitDataUIElements[27].SetData("O2 is Off", switchData.o2_off.ToString());*/
     }
 
-    private string getLesserTime(string strOxygen, string strBattery, out string identifier)
+    private string getLesserTime(string strOxygen, string strBattery, string strWater, out string identifier)
     {
         string[] strOxygenParsed = strOxygen.Split(':');
-        string[] strBatteryParsed = strBattery.Split(':'); 
+        string[] strBatteryParsed = strBattery.Split(':');
+        string[] strWaterParsed = strWater.Split(':'); 
 
         for (int i = 0; i < strOxygenParsed.Length; i++)
         {
             int intOxygen = int.MaxValue; 
             int intBattery = int.MaxValue;
+            int intWater = int.MaxValue; 
 
             bool oxygenOk = int.TryParse(strOxygenParsed[i], out intOxygen);
             bool batteryOk = int.TryParse(strBatteryParsed[i], out intBattery);
+            bool waterOk = int.TryParse(strWaterParsed[i], out intWater); 
 
             if (!oxygenOk)
             {
@@ -307,19 +331,31 @@ public class JSONParse : MonoBehaviour {
                 return "Incorrect Battery Value"; 
             }
 
-            if (intOxygen > intBattery)
+            if (!waterOk)
+            {
+                identifier = "Error";
+                return "Incorrect Water Value"; 
+            }
+
+            int minimumVal = Mathf.Min(intOxygen, intBattery, intWater); 
+
+            if (minimumVal == intBattery)
             {
                 identifier = "Battery"; 
                 return strBattery; 
-            } else if (intOxygen < intBattery)
+            } else if (minimumVal == intOxygen)
             {
                 identifier = "Oxygen"; 
                 return strOxygen; 
-            } 
+            } else if (minimumVal == intWater)
+            {
+                identifier = "Water";
+                return strWater;
+            }
         }
 
-        // The two strings are equal 
-        identifier = "Battery and Oxygen"; 
+        // We shouldn't get here 
+        identifier = ""; 
         return strBattery; 
     }
 
@@ -491,6 +527,8 @@ public class SuitData
     public string t_battery = "";
     public string t_oxygen = "";
     public string t_water = "";
+    public string ox_primary;        //Primary Oxygen
+    public string ox_secondary;      // Secondary Oxygen
 }
 
 [System.Serializable]

@@ -51,6 +51,17 @@ public class TranslationController : MonoBehaviour
         Debug.Log("Stopping path capture.");
     }
 
+    public void togglePathCapture()
+    {
+        if (doCapture)
+        {
+            stopPathCapture(); 
+        } else
+        {
+            startPathCapture(); 
+        }
+    }
+
     public void hidePath()
     {
         Debug.Log("Hiding Path"); 

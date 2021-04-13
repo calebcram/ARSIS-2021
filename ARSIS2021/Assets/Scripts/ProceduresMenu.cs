@@ -12,21 +12,20 @@ public class ProceduresMenu : MonoBehaviour
         List<Procedure> procedures = TaskManager.S.allProcedures;
         foreach (Procedure p in procedures)
         {
+            if (p.emergency) return; 
            for (int j = 0; j < p.Tasks.Length; j++)
            {
                 GameObject listItem = list.addListItem(p.Tasks[j].Title);
 
                 Interactable interact = listItem.GetComponent<Interactable>();
+                int taskNum = j; 
                 interact.OnClick.AddListener(() =>
                 {
-                    MenuController.s.currentProcedure = 0;
-                    MenuController.s.currentTask = 0;
+                    MenuController.s.currentProcedure = 0; // TODO: should be actual procedure number if we had more than one
+                    MenuController.s.currentTask = taskNum;
                     MenuController.s.currentSubTask = 0;
                     VoiceManager.S.generateTaskMenu();
                 });  
-            
-                // TODO: set up needed interaction 
-                // voice control, functions it triggers, etc 
            }
 
             

@@ -9,7 +9,8 @@ public class PhotonMeshTransfer : MonoBehaviourPun
     public float testLastSendGametime = 0;
     public GameObject meshPrefab = null;
     public Material meshMaterial = null;
-    // Start is called before the first frame update
+
+
     void Start()
     {
         if (!singleton)
@@ -23,7 +24,6 @@ public class PhotonMeshTransfer : MonoBehaviourPun
         }
     }
 
-    // Update is called once per frame
     void FixedUpdate()
     {
         float timeDif = Time.realtimeSinceStartup - testLastSendGametime;
@@ -88,7 +88,7 @@ public class PhotonMeshTransfer : MonoBehaviourPun
         meesh.RecalculateTangents();
         newMesh.GetComponent<MeshFilter>().mesh = meesh;
         newMesh.GetComponent<MeshRenderer>().material = meshMaterial;
-        MiniMapHandler.getSingleton().addElement(meesh, pos, rot);
+        //MiniMapHandler.getSingleton().addElement(meesh, pos, rot);
     }
 
     public static PhotonMeshTransfer getSingleton()

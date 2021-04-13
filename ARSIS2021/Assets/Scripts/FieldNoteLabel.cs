@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro; 
 
 public class FieldNoteLabel : MonoBehaviour
 {
-    public Text dateText; 
+    public TextMeshProUGUI dateText; 
 }

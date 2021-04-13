@@ -53,7 +53,7 @@ public class TaskManager : MonoBehaviour
         }
 
         //m_OutputErrorData = FindObjectOfType<OutputErrorData>();
-        InvokeRepeating("UpdateSystemData", 1, 5);
+        //InvokeRepeating("UpdateSystemData", 1, 5);
     }
 
     public Procedure GetProcedure(int procedureIndex)
@@ -261,6 +261,7 @@ public class Task
     [Header("Task")]
     public string Title;
     public SubTask[] SubTasks;
+    bool complete = false; 
 
     public Task(string title, int numSubTasks)
     {

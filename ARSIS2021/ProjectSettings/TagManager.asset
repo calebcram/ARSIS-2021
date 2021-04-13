@@ -3,7 +3,9 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Menu
+  - Highlight
   layers:
   - Default
   - TransparentFX
@@ -34,8 +36,8 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
+  - minimap_tags
+  - Minimap
   - Spatial Awareness
   m_SortingLayers:
   - name: Default

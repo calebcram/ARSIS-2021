@@ -20,6 +20,8 @@ namespace Photon.Pun.UtilityScripts
         public static bool isConnected = false;
         public static int disconnectCount = 0;
 
+        public RandomMeshGenerator randomMesh;
+
         public void Start()
         {
             if (this.AutoConnect)
@@ -73,6 +75,7 @@ namespace Photon.Pun.UtilityScripts
             roomOptions.MaxPlayers = 4;
             roomOptions.IsOpen = true;
             PhotonNetwork.JoinOrCreateRoom("Spaace", roomOptions, TypedLobby.Default);
+            //PhotonNetwork.JoinRoom("Spaace");
             isConnecting = true;
         }
 
@@ -86,6 +89,11 @@ namespace Photon.Pun.UtilityScripts
             roomOptions.IsOpen = true;
             PhotonNetwork.JoinOrCreateRoom("Spaace", roomOptions, TypedLobby.Default);
             isConnecting = true;
+        }
+
+        public override void OnPlayerEnteredRoom(Player newPlayer)
+        {
+            Debug.Log("Other player entered room");
         }
 
         public override void OnJoinRandomFailed(short returnCode, string message)
@@ -118,6 +126,11 @@ namespace Photon.Pun.UtilityScripts
             Debug.Log("OnJoinedRoom() called by PUN. Now this client is in a room. From here on, your game would be running.");
             isConnecting = false;
             isConnected = true;
+
+            // Uncomment the following lines if you want to confirm mesh sending works from the editor: 
+            //Mesh rand = randomMesh.generateRandomGarbageMesh(100);
+            //PhotonMeshTransfer.getSingleton().sendMesh(Vector3.zero, this.transform.rotation, rand);
+            MeshDataGatherer.S.sendAllMeshes(); 
         }
     }
 }

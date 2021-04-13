@@ -52,11 +52,13 @@ public class SuitDataElement : MonoBehaviour
         m_BiometricTitle.text = dataTitle;
         m_BiometricValue.text = dataValue;
 
-        lowerWarning = 1;
-        lowerCaution = 1.001f; 
-        nominalValue = 0;
-        upperCaution = 1.999f; 
-        upperWarning = 2; 
+        m_DataValue = float.Parse(dataValue);
+        //Debug.Log(m_DataValue);
+        lowerWarning = 20;
+        lowerCaution = 20.001f; 
+        nominalValue = 50;
+        upperCaution = 19.999f; 
+        upperWarning = 10; 
     }
 
     void Update()
@@ -114,7 +116,21 @@ public class SuitDataElement : MonoBehaviour
         }
         // "SYSTEM CRITICAL";
         return warningColor;*/
-
+        if (nominalValue == 50)
+        {
+            if(m_DataValue > nominalValue)
+            {
+                return nominalColor;
+            }
+            if(m_DataValue < nominalValue )
+            {
+                return cautionColor;
+            }
+            if(m_DataValue < lowerWarning)
+            {
+                return warningColor;
+            }
+        }
         if (m_DataValue > upperWarning)
         {
             return warningColor;
@@ -140,5 +156,7 @@ public class SuitDataElement : MonoBehaviour
             //Debug.Log("Returning bad telemetry value " + m_DataValue + " in " + name);
             return warningColor;
         }
+
+        
     }
 }

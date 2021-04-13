@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using Photon.Realtime;
 using Photon.Pun;
 using Photon.Pun.UtilityScripts;
+using Microsoft.MixedReality.Toolkit;
+using Microsoft.MixedReality.Toolkit.SpatialAwareness;
 
 public enum BakedState
 {
@@ -33,12 +35,13 @@ class SurfaceEntry : IComparable<SurfaceEntry>
     }
 }
 
-public class MeshDataGatherer : MonoBehaviour
+public class MeshDataGatherer : MonoBehaviour, IMixedRealitySpatialAwarenessObservationHandler<SpatialAwarenessMeshObject>
 {
 
     public PhotonMeshTransfer PMT = null;
     // This observer is the window into the spatial mapping world.  
-    SurfaceObserver m_Observer;
+    //    SurfaceObserver m_Observer;
+    IMixedRealitySpatialAwarenessMeshObserver meshObserver; 
 
     // This dictionary contains the set of known spatial mapping surfaces.
     // Surfaces are updated, added, and removed on a regular basis.
@@ -63,40 +66,97 @@ public class MeshDataGatherer : MonoBehaviour
     public static MeshDataGatherer S;
     private float deltaTimeAveraged = 1.0f;
 
+    public bool telestrationOn = true; 
+
     void Start()
     {
         PMT = PhotonMeshTransfer.getSingleton();
-        m_Observer = new SurfaceObserver();
-        m_Observer.SetVolumeAsSphere(new Vector3(0.0f, 0.0f, 0.0f), 200.0f);
-        SurfacesList = new List<SurfaceEntry>();
-        m_Surfaces = new Dictionary<int, SurfaceEntry>();
-        m_WaitingForBake = false;
-        m_lastUpdateTime = 0.0f;
+
+        meshObserver = CoreServices.GetSpatialAwarenessSystemDataProvider<IMixedRealitySpatialAwarenessMeshObserver>();
+        meshObserver.DisplayOption = SpatialAwarenessMeshDisplayOptions.None;
+        //        m_Observer = new SurfaceObserver();
+        //m_Observer.SetVolumeAsSphere(new Vector3(0.0f, 0.0f, 0.0f), 200.0f);
+        //SurfacesList = new List<SurfaceEntry>();
+        //m_Surfaces = new Dictionary<int, SurfaceEntry>();
+        //m_WaitingForBake = false;
+        //m_lastUpdateTime = 0.0f;
         S = this;
     }
 
-
-    public void disableMeshDisplay()
+    public void toggleTelestration()
     {
-        isRendering = false;
-        for (int i = 0; i < SurfacesList.Count; i++)
+        if (!telestrationOn)
         {
-            SurfacesList[i].m_Surface.GetComponent<MeshRenderer>().enabled = isRendering; // SetActive(isRendering); 
+            telestrationOn = true;
+            sendAllMeshes(); 
+        } 
+        else if (telestrationOn) telestrationOn = false;
+    }
+
+    /*    public void disableMeshDisplay()
+        {
+            isRendering = false;
+            for (int i = 0; i < SurfacesList.Count; i++)
+            {
+                SurfacesList[i].m_Surface.GetComponent<MeshRenderer>().enabled = isRendering; // SetActive(isRendering); 
+            }
+        }
+
+        public void enableMeshDisplay()
+        {
+            isRendering = true;
+            for (int i = 0; i < SurfacesList.Count; i++)
+            {
+                SurfacesList[i].m_Surface.GetComponent<MeshRenderer>().enabled = isRendering;
+            }
+        }
+    */
+    private void OnEnable()
+    {
+        // Register component to listen for Mesh Observation events, typically done in OnEnable()
+        CoreServices.SpatialAwarenessSystem.RegisterHandler<IMixedRealitySpatialAwarenessObservationHandler<SpatialAwarenessMeshObject>>(this); 
+    }
+
+    public void sendAllMeshes()
+    {
+        if (!telestrationOn) return; 
+        foreach (SpatialAwarenessMeshObject meshObject in meshObserver.Meshes.Values)
+        {
+            Mesh meesh = meshObject.Filter.mesh;
+            PMT.sendMesh(meshObject.GameObject.transform.position, meshObject.GameObject.transform.rotation, meesh);
         }
     }
 
-    public void enableMeshDisplay()
+    private void OnDisable()
     {
-        isRendering = true;
-        for (int i = 0; i < SurfacesList.Count; i++)
-        {
-            SurfacesList[i].m_Surface.GetComponent<MeshRenderer>().enabled = isRendering;
-        }
+        // Unregister component from Mesh Observation events, typically done in OnDisable()
+        CoreServices.SpatialAwarenessSystem.UnregisterHandler<IMixedRealitySpatialAwarenessObservationHandler<SpatialAwarenessMeshObject>>(this);
+    }
+
+    public virtual void OnObservationAdded(MixedRealitySpatialAwarenessEventData<SpatialAwarenessMeshObject> eventData)
+    {
+        if (!telestrationOn) return; 
+        // Do stuff
+        //GameObject goToSend = eventData.SpatialObject.GameObject; 
+        //Mesh meeshToSend = goToSend.GetComponent<Mesh>(); 
+        //PMT.sendMesh(goToSend.transform.position, goToSend.transform.rotation, meeshToSend);
+        Mesh meesh = eventData.SpatialObject.Filter.mesh;
+        PMT.sendMesh(eventData.SpatialObject.GameObject.transform.position, eventData.SpatialObject.GameObject.transform.rotation, meesh);
+    }
+
+    public virtual void OnObservationUpdated(MixedRealitySpatialAwarenessEventData<SpatialAwarenessMeshObject> eventData)
+    {
+        // Do stuff
+    }
+
+    public virtual void OnObservationRemoved(MixedRealitySpatialAwarenessEventData<SpatialAwarenessMeshObject> eventData)
+    {
+        // Do stuff
     }
 
     private void FixedUpdate()
     {
-        if (!PhotonNetwork.InRoom)
+/*        if (!PhotonNetwork.InRoom)
             return;
         if (PMT == null)
             PMT = PhotonMeshTransfer.getSingleton();
@@ -150,12 +210,12 @@ public class MeshDataGatherer : MonoBehaviour
                 }
             }
             lastMeshDownlinkTime = Time.realtimeSinceStartup;
-        }
+        }*/
     }
 
     void Update()
     {
-        deltaTimeAveraged += Time.deltaTime * 0.001f;
+/*        deltaTimeAveraged += Time.deltaTime * 0.001f;
         deltaTimeAveraged *= 0.999f;
         // Avoid calling Update on a SurfaceObserver too frequently.
         if (m_lastUpdateTime + 15.0f < Time.realtimeSinceStartup)
@@ -237,12 +297,12 @@ public class MeshDataGatherer : MonoBehaviour
                     Debug.Log(System.String.Format("Bake for id {0} failed unexpectedly!", bestSurface.m_Id));
                 }
             }
-        }
+        }*/
     }
 
     // This handler receives surface changed events and is propagated by the 
     // Update method on SurfaceObserver.  
-    void SurfaceChangedHandler(SurfaceId id, SurfaceChange changeType, Bounds bounds, DateTime updateTime)
+/*    void SurfaceChangedHandler(SurfaceId id, SurfaceChange changeType, Bounds bounds, DateTime updateTime)
     {
         SurfaceEntry entry;
         switch (changeType)
@@ -316,5 +376,5 @@ public class MeshDataGatherer : MonoBehaviour
             Debug.Log(System.String.Format("Paranoia:  Couldn't find surface {0} after a bake!", sd.id.handle));
             Assert.IsTrue(false);
         }
-    }
+    }*/
 }

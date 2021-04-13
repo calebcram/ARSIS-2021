@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System;
 using UnityEngine.Events;
+using Microsoft.MixedReality.Toolkit; 
 
 /// <summary>
 /// Manages all ADELE voice commands. 
@@ -21,7 +22,7 @@ public class VoiceManager : MonoBehaviour
     // List of all the diagrams
     public List<Image> allDiagrams = new List<Image>();
 
-    private MenuController mc;
+    public MenuController mc;
     private GameObject menuToUse;
 
     public GameObject sadFace; 
@@ -55,7 +56,13 @@ public class VoiceManager : MonoBehaviour
     bool dictationIsOn = false;
 
     public delegate void onCapture();
-    public onCapture captureEvent; 
+    public onCapture captureEvent;
+
+    public bool voiceOn = true;
+    public GameObject mrtkVoiceObject;
+
+    public GameObject map;
+    public bool showingMap = true; 
 
     void Awake()
     {
@@ -144,13 +151,11 @@ public class VoiceManager : MonoBehaviour
         _keywordRecognizer.Start(); 
 
         // Initializes menu controller 
-        mc = FindObjectOfType(typeof(MenuController)) as MenuController;
+        //mc = FindObjectOfType(typeof(MenuController)) as MenuController;
 
         //Add the diagrams to allDiagrams list
 
     }
-
-
 
     public void resetKeywordRecognizer()
     {
@@ -176,8 +181,8 @@ public class VoiceManager : MonoBehaviour
     }
 
     public void addCommand(string name, UnityEvent response) {
-        if (_keywords.ContainsKey("Adele " + name)) return;
-        _keywords.Add("Adele " + name, () =>
+        if (_keywords.ContainsKey(name)) return;
+        _keywords.Add(name, () =>
         {
             response.Invoke(); 
         });
@@ -187,12 +192,64 @@ public class VoiceManager : MonoBehaviour
 
     public void removeCommand(string name)
     {
-        if (_keywords.ContainsKey("Adele " + name))
+        if (_keywords.ContainsKey(name))
         {
-            _keywords.Remove("Adele " + name); 
+            _keywords.Remove(name); 
         }
         //Debug.Log("Removed command: " + name); 
         resetKeywordRecognizer(); 
+    }
+
+    public void toggleSpatialMapping()
+    {
+        MeshDataGatherer.S.toggleTelestration(); 
+    }
+
+    public void toggleBiometrics()
+    {
+
+    }
+
+    public void toggleMapVisibility()
+    {
+        Debug.Log("TOGGLE MAP VISIBILITY"); 
+        if (showingMap)
+        {
+            showingMap = false; 
+            map.SetActive(false);
+        } else
+        {
+            showingMap = true;
+            map.SetActive(true); 
+        }
+    }
+
+    public void toggleVoice()
+    {
+        if (!voiceOn)
+        {
+            voiceOn = true;
+            mrtkVoiceObject.SetActive(true);
+        }
+        else if (voiceOn)
+        {
+            voiceOn = false;
+            mrtkVoiceObject.SetActive(false);
+        }
+    }
+
+    public void toggleMap()
+    {
+        int currentMap = minimap_manager.S.currentMap; 
+        if (currentMap == 0)
+        {
+            minimap_manager.S.currentMap = 1;
+            minimap_manager.S.LoadMap(1); 
+        } else if (currentMap == 1)
+        {
+            minimap_manager.S.currentMap = 0;
+            minimap_manager.S.LoadMap(0);
+        }
     }
 
 
@@ -259,7 +316,15 @@ public class VoiceManager : MonoBehaviour
     public void NewFieldNote()
     {
         mc.addMenu(mc.m_newFieldNote);
-        FieldNotesManager.s.showFirstQuestion(); 
+        FieldNotesManager.s.startFieldNote(); 
+    }
+
+    public void FieldNoteReturn()
+    {
+        if (mc.currentMenuHit == mc.m_fieldNotes)
+        {
+            FieldNotes(); 
+        }
     }
 
     public void FieldNotes()
@@ -439,10 +504,14 @@ public class VoiceManager : MonoBehaviour
 
     public void Close()
     {
-        m_Source.clip = m_CloseMenu;
-        m_Source.Play();
-
+        //m_Source.clip = m_CloseMenu;
+        //m_Source.Play();
         mc.closeMenu();
+    }
+
+    public void FollowMe()
+    {
+        mc.followMe(); 
     }
 
     public void Select()
@@ -470,12 +539,10 @@ public class VoiceManager : MonoBehaviour
 
     public void TakePhoto()
     {
-        //VuforiaCameraCapture.S.TakePhoto(true);
+        CameraCapture.S.Capture(); 
 
         m_Source.clip = m_ZoomOut;
         m_Source.Play();
-
-        captureEvent.Invoke();
     }
 
     public void Toggle()
@@ -564,17 +631,29 @@ public class VoiceManager : MonoBehaviour
         m_Source.Play();
     }
 
+    public void Skip()
+    {
+        if (FieldNotesManager.s.inProgress)
+        {
+            FieldNotesManager.s.setSkipped();
+            FieldNotesManager.s.nextQuestion(); 
+            //mc.deselect.Invoke();
+            //mc.unhighlight.Invoke(); 
+        }
+    }
+
     public void Next()
     {
         if (FieldNotesManager.s.inProgress)
         {
             FieldNotesManager.s.nextQuestion();
-            mc.deselect.Invoke();
-            mc.unhighlight.Invoke(); 
+            //mc.deselect.Invoke();
+            //mc.unhighlight.Invoke(); 
         }
         if (mc.currentMenuHit == mc.m_taskList)
         {
             mc.currentSubTask++;
+            
             //int maxLength = TaskManager.S.allTasks[mc.currentTask];
             if (mc.currentSubTask > TaskManager.S.GetTask(mc.currentProcedure, mc.currentTask).SubTasks.Length - 1)
             {
@@ -582,11 +661,14 @@ public class VoiceManager : MonoBehaviour
                 mc.currentSubTask = 0;
                 mc.currentTask++;
 
-                if (mc.currentTask > TaskManager.S.GetProcedure(mc.currentProcedure).Tasks.Length - 1)
+                
+
+                    if (mc.currentTask > TaskManager.S.GetProcedure(mc.currentProcedure).Tasks.Length - 1)
                 {
                     //when procedure is complete
-                    mc.currentTask = 0;
-                    mc.currentProcedure++;
+                    mc.m_blankTaskMenu.SetActive(false);  
+                    //mc.currentTask = 0;
+                    //mc.currentProcedure++;
                 }
             }
 
@@ -600,7 +682,7 @@ public class VoiceManager : MonoBehaviour
     public void Back()
     {
         mc.currentSubTask--;
-        //int maxLength = TaskManager.S.allTasks[mc.currentTask];
+        //int maxLength = TaskManager.S.allTasks[mc.currentTask]; // 
         if (mc.currentSubTask < 0)
         {
             mc.currentTask--;
@@ -655,6 +737,15 @@ public class VoiceManager : MonoBehaviour
         int curProcedure = mc.currentProcedure;
         int curTask = mc.currentTask;
         int curSubTask = mc.currentSubTask;
+
+        bool emergency = TaskManager.S.GetProcedure(mc.currentProcedure).emergency; 
+        if (emergency)
+        {
+            mc.nextButton.SetActive(false); 
+        } else
+        {
+            mc.nextButton.SetActive(true); 
+        }
 
         Debug.Log("Trying to display procedure " + mc.currentProcedure + "task" + mc.currentTask + " subtask " + mc.currentSubTask);
 
@@ -863,6 +954,7 @@ public class VoiceManager : MonoBehaviour
     // Keyword Recognition 
     private void KeywordRecognizer_OnPhraseRecognized(PhraseRecognizedEventArgs args)
     {
+        if (!voiceOn) return; 
         //dot.color = Color.red;
         /*string input = args.text;
         if (input.ToLower().Contains("adele"))

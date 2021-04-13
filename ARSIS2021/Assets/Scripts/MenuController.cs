@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; 
+using TMPro;
+using Microsoft.MixedReality.Toolkit.UI; 
 
 /// <summary>
 /// Controls all displaying of menus. 
@@ -60,6 +61,7 @@ public class MenuController : MonoBehaviour
     public TextMeshPro m_stepNextText;
     public TextMeshPro m_warningText;
     public TextMeshPro m_QRScanData;
+    public GameObject nextButton; 
 
     public bool taskZoomedIn = false;
 
@@ -98,16 +100,17 @@ public class MenuController : MonoBehaviour
         m_CurrentMenu = newMenu;
         if (oldMenu != null)
         {
-            m_PreviousMenu = oldMenu;
-            oldMenu.SetActive(false);
+            m_PreviousMenu = currentMenuHit;
+            currentMenuHit.SetActive(false);
 
             // Set position and rotation of the new menu to be the same as the previous menu 
-            newMenu.transform.position = oldMenu.transform.position;
-            newMenu.transform.rotation = oldMenu.transform.rotation;
+            newMenu.transform.position = currentMenuHit.transform.position;
+            newMenu.transform.rotation = currentMenuHit.transform.rotation;
         }
 
         // Make the new menu visible 
         ToggleVisibility(newMenu);
+        currentMenuHit = null; 
 
         // Play sound 
         m_Source.clip = m_changeMenuSound;
@@ -157,7 +160,23 @@ public class MenuController : MonoBehaviour
             {
                 FieldNotesManager.s.inProgress = false;
             }
-            currentMenuHit.transform.gameObject.SetActive(false);
+            //currentMenuHit.transform.gameObject.SetActive(false);
+            currentMenuHit.SetActive(false); 
+        }
+    }
+
+    public void followMe()
+    {
+        if (currentMenuHit != null)
+        {
+            if (currentMenuHit == m_newFieldNote)
+            {
+                FieldNotesManager.s.inProgress = false;
+            }
+            //currentMenuHit.transform.gameObject.SetActive(false);
+            FollowMeToggle followtoggle = currentMenuHit.GetComponentInParent<FollowMeToggle>();
+            if (followtoggle == null) followtoggle = GetComponent<FollowMeToggle>();
+            followtoggle.ToggleFollowMeBehavior(); 
         }
     }
     /* aads a menu to the field of view. 
@@ -313,7 +332,7 @@ public class MenuController : MonoBehaviour
         m_PreviousMenu.SetActive(true);
     }
 
-   /* public SelectableObj currentSelection = null; 
+   //public SelectableObj currentSelection = null; 
     private void Update()
     {
 
@@ -321,22 +340,25 @@ public class MenuController : MonoBehaviour
 
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.rotation * Vector3.forward, out hit, Mathf.Infinity) && hit.transform.tag == "Menu")
         {
-            //Debug.Log("Hitting a thing");
             if (currentMenuHit == null)
             {
                 //Debug.Log("Forward!");
                 //hit.transform.position = new Vector3(hit.transform.position.x, hit.transform.position.y, hit.transform.position.z - 0.05f);
-                currentMenuHit = hit.transform.gameObject;
+                FollowMeToggle followtoggle = hit.transform.gameObject.GetComponentInParent<FollowMeToggle>();
+                if (followtoggle == null) followtoggle = hit.transform.gameObject.GetComponent<FollowMeToggle>();
+                GameObject menugo = followtoggle.gameObject;
+                currentMenuHit = menugo;
             }
         }
         else if (currentMenuHit != null)
         {
             //Debug.Log("Back you!");
             //currentMenuHit.transform.position = new Vector3(currentMenuHit.transform.position.x, currentMenuHit.transform.position.y, currentMenuHit.transform.position.z + 0.05f);
+            
             currentMenuHit = null;
         }
 
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.rotation * Vector3.forward, out hit, Mathf.Infinity) && hit.transform.tag == "selectable")
+        /*if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.rotation * Vector3.forward, out hit, Mathf.Infinity) && hit.transform.tag == "selectable")
         {
             currentSelection = hit.transform.gameObject.GetComponent<SelectableObj>(); 
             unhighlight.Invoke(); // unselect everything before selecting the new button 
@@ -346,7 +368,7 @@ public class MenuController : MonoBehaviour
             unhighlight.Invoke(); 
             currentSelection.onUnhighlight(); 
             currentSelection = null; 
-        }
-    }*/
+        }*/
+    }
 }
 
