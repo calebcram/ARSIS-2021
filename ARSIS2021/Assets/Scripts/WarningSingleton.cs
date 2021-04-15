@@ -27,29 +27,37 @@ public class WarningSingleton : MonoBehaviour
     {
         if (m_Warnings.Contains(s)) return;
 
-        m_Warnings.Add(s);
-        m_DataInWarning = true;
-        FindObjectOfType<OutputErrorData>().OutputErrorText("Warning in Biometrics");
+        FindObjectOfType<OutputErrorData>().OutputErrorText("Warning in Biometrics"); // this plays the sound
         string error = "Biometric out of range"; 
         if (s == "Fan Tachometer") // Fan Error 
         {
             error = "Fan error";
+            if (warnings.ContainsKey(error)) return;
             ErrorManager.S.fanError(); 
         } else if (s == "Time Life Oxygen" || s == "Oxygen Pressure" || s == "Oxygen Rate") // Oxygen Error
         {
             error = "Oxygen error";
+            if (warnings.ContainsKey(error)) return;
             ErrorManager.S.O2Error(); 
         } else if (s == "SUB Temperature") // Temperature error
         {
             error = "Temperature error";
-            ErrorManager.S.TemperatureError(); 
+            ErrorManager.S.TemperatureError();
+            if (warnings.ContainsKey(error)) return;
         } else if (s == "SUB Pressure" || s == "Internal Suit Pressure" || s == "H20 Gas Pressure" || s == "H20 Liquid Pressure" || s == "SOP Pressure")
         {
             error = "Pressure error";
+            if (warnings.ContainsKey(error)) return;
             ErrorManager.S.PressureError(); 
         }
-        //Debug.Log("Adding error");
-        if (warnings.ContainsKey(error)) return; 
+        if (error == "Biometric out of range")
+        {
+            m_DataInWarning = true;
+            m_Warnings.Add(s);
+            return;
+        } 
+        m_Warnings.Add(error);
+        //if (warnings.ContainsKey(error)) return; 
         GameObject warningGO = Instantiate(warningPrefab);
         TextMeshProUGUI warningText = warningGO.GetComponentInChildren<TextMeshProUGUI>();
         warningText.text = error; 
@@ -76,6 +84,7 @@ public class WarningSingleton : MonoBehaviour
         {
             error = "Pressure error";
         }
+        if (error == "Biometric out of range") return; 
         if (m_Warnings.Contains(error))
         {
             m_Warnings.Remove(error);

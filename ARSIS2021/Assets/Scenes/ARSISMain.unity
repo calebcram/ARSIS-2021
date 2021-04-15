@@ -2564,30 +2564,61 @@ MonoBehaviour:
     Tasks:
     - Title: Prepare UIA
       SubTasks:
-      - text: Ensure that POWER EV-1 and 2 are set to OFF
+      - text: Ensure that POWER EV-1 is set to OFF
         type: 
         warning: 
         image: 
+        varName: emu1
+        expectedValue: OFF
         imageTex: {fileID: 0}
-      - text: Ensure that WATER SUPPLY EV-1 and  2 is set to CLOSE
+      - text: Ensure that POWER EV-2 is set to OFF
         type: 
         warning: 
         image: 
+        varName: emu2
+        expectedValue: OFF
         imageTex: {fileID: 0}
-      - text: Ensure that OXYGEN EV-1 and 2 is set to cLOSE
+      - text: Ensure that WATER SUPPLY EV-1 is set to CLOSE
         type: 
         warning: 
         image: 
+        varName: ev1_supply
+        expectedValue: CLOSE
+        imageTex: {fileID: 0}
+      - text: Ensure that WATER SUPPLY EV-2 is set to CLOSE
+        type: 
+        warning: 
+        image: 
+        varName: ev2_supply
+        expectedValue: CLOSE
+        imageTex: {fileID: 0}
+      - text: Ensure that OXYGEN EV-1 is set to CLOSE
+        type: 
+        warning: 
+        image: 
+        varName: emu1_O2
+        expectedValue: CLOSE
+        imageTex: {fileID: 0}
+      - text: Ensure that OXYGEN EV-2 is set to CLOSE
+        type: 
+        warning: 
+        image: 
+        varName: emu2_O2
+        expectedValue: CLOSE
         imageTex: {fileID: 0}
       - text: Switch O2 Vent to OPEN
         type: 
         warning: 
         image: 
+        varName: O2_vent
+        expectedValue: VENT
         imageTex: {fileID: 0}
       - text: O2 vent - CLOSE
         type: 
         warning: 
         image: 
+        varName: O2_vent
+        expectedValue: CLOSE
         imageTex: {fileID: 0}
     - Title: Fill and Dump UIA and SCU O2 Lines
       SubTasks:
@@ -2595,21 +2626,29 @@ MonoBehaviour:
         type: 
         warning: 
         image: 
+        varName: O2_vent
+        expectedValue: CLOSE
         imageTex: {fileID: 0}
       - text: Switch OXYGEN EV-1 to OPEN
         type: 
         warning: 
         image: 
+        varName: emu1_O2
+        expectedValue: OPEN
         imageTex: {fileID: 0}
-      - text: Switch OXYGEN EV-1 to OPEN
+      - text: Switch OXYGEN EV-1 to CLOSED
         type: 
         warning: 
         image: 
+        varName: emu1_O2
+        expectedValue: CLOSE
         imageTex: {fileID: 0}
       - text: Switch O2 Vent to OPEN
         type: 
         warning: 
         image: 
+        varName: O2_vent
+        expectedValue: VENT
         imageTex: {fileID: 0}
     - Title: Final Pressurization
       SubTasks:
@@ -2617,16 +2656,22 @@ MonoBehaviour:
         type: 
         warning: 
         image: 
+        varName: O2_vent
+        expectedValue: CLOSE
         imageTex: {fileID: 0}
       - text: Switch OXYGEN EV-1 to OPEN
         type: 
         warning: 
         image: 
+        varName: emu1_O2
+        expectedValue: OPEN
         imageTex: {fileID: 0}
       - text: Switch OXYGEN EV-1 to CLOSE
         type: 
         warning: 
         image: 
+        varName: emu1_O2
+        expectedValue: CLOSE
         imageTex: {fileID: 0}
     - Title: Preparation for Donning
       SubTasks:
@@ -2634,21 +2679,29 @@ MonoBehaviour:
         type: 
         warning: 
         image: 
+        varName: emu1
+        expectedValue: OFF
         imageTex: {fileID: 0}
-      - text: 'Switch DCU POWER to BATT '
+      - text: Switch DCU POWER to BATT, then continue to next step
         type: 
         warning: 
         image: 
+        varName: 
+        expectedValue: 
         imageTex: {fileID: 0}
       - text: 'Switch UIA POWER EV-1 to ON '
         type: 
         warning: 
         image: 
+        varName: emu1
+        expectedValue: ON
         imageTex: {fileID: 0}
       - text: Procedure complete! You are now ready for EVA.
         type: 
         warning: 
         image: 
+        varName: 
+        expectedValue: 
         imageTex: {fileID: 0}
   - procedure_title: Emergency Procedure Fan
     emergency: 1
@@ -2660,6 +2713,8 @@ MonoBehaviour:
         type: 
         warning: 
         image: 
+        varName: 
+        expectedValue: 
         imageTex: {fileID: 0}
   - procedure_title: Emergency Procedure O2
     emergency: 1
@@ -2671,6 +2726,8 @@ MonoBehaviour:
         type: 
         warning: 
         image: 
+        varName: 
+        expectedValue: 
         imageTex: {fileID: 0}
   - procedure_title: Emergency Procedure Temperature
     emergency: 1
@@ -2682,6 +2739,8 @@ MonoBehaviour:
         type: 
         warning: 
         image: 
+        varName: 
+        expectedValue: 
         imageTex: {fileID: 0}
   - procedure_title: Emergency Procedure Pressure
     emergency: 1
@@ -2693,6 +2752,57 @@ MonoBehaviour:
         type: 
         warning: 
         image: 
+        varName: 
+        expectedValue: 
+        imageTex: {fileID: 0}
+  - procedure_title: Table Procedure
+    emergency: 0
+    num_steps: 5
+    Tasks:
+    - Title: Locate Part E
+      SubTasks:
+      - text: 'Flip Pump switch on DCU '
+        type: 
+        warning: 
+        image: 
+        varName: 
+        expectedValue: 
+        imageTex: {fileID: 0}
+    - Title: Pull on knob behind Part E
+      SubTasks:
+      - text: 'Flip Pump switch on DCU '
+        type: 
+        warning: 
+        image: 
+        varName: 
+        expectedValue: 
+        imageTex: {fileID: 0}
+    - Title: Rotate table to horizontal position
+      SubTasks:
+      - text: 'Flip Pump switch on DCU '
+        type: 
+        warning: 
+        image: 
+        varName: 
+        expectedValue: 
+        imageTex: {fileID: 0}
+    - Title: Move cup to other side of table
+      SubTasks:
+      - text: 'Flip Pump switch on DCU '
+        type: 
+        warning: 
+        image: 
+        varName: 
+        expectedValue: 
+        imageTex: {fileID: 0}
+    - Title: Procedure complete!
+      SubTasks:
+      - text: 'Flip Pump switch on DCU '
+        type: 
+        warning: 
+        image: 
+        varName: 
+        expectedValue: 
         imageTex: {fileID: 0}
   images: []
   url: 
@@ -3656,6 +3766,7 @@ GameObject:
   - component: {fileID: 499787634}
   - component: {fileID: 499787633}
   - component: {fileID: 499787635}
+  - component: {fileID: 499787636}
   m_Layer: 0
   m_Name: BiometricsManager
   m_TagString: Untagged
@@ -3705,9 +3816,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3f50897aeac84146902356a8305a416, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  testVal: 20190
+  testing: 0
   m_JSONString: 
   url: https://suits-2021.herokuapp.com/api/simulation/state
   switchUrl: https://agile-badlands-39994.herokuapp.com/api/suitswitch/recent
+  testurl: http://localhost:3000/api/simulation/state
   bioText: {fileID: 0}
   m_SuitDataUIElements:
   - {fileID: 13255834}
@@ -3743,7 +3857,7 @@ MonoBehaviour:
   - {fileID: 202957730}
   - {fileID: 1084122709}
   - {fileID: 2085326899}
-  m_BiometricInCautionElement: {fileID: 1461151518}
+  m_BiometricInCautionElement: {fileID: 1635380014}
   timeLeftText: {fileID: 1713992118}
   m_HeartRateLow: 80
   m_HeartRateHigh: 100
@@ -3769,6 +3883,7 @@ MonoBehaviour:
   m_P_SOPHigh: 950
   m_Rate_SOPLow: 0.5
   m_Rate_SOPHigh: 1
+  parsingOn: 1
 --- !u!114 &499787635
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3785,6 +3900,37 @@ MonoBehaviour:
   m_LastSirenTime: 0
   m_Source: {fileID: 1491634857}
   m_bad: {fileID: 8300000, guid: b6371c2ae9a19304db94f30798728f03, type: 3}
+--- !u!114 &499787636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 499787631}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9221621eb23214b4795f451cf308f0db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uiaData:
+    started_at: 
+    emu1: 
+    emu2: 
+    o2_supply_pressure1: 0
+    o2_supply_pressure2: 0
+    ev1_supply: 
+    ev2_supply: 
+    ev1_waste: 
+    ev2_waste: 
+    emu1_O2: 
+    emu2_O2: 
+    oxygen_supp_out1: 0
+    oxygen_supp_out2: 0
+    O2_vent: 
+    depress_pump: 
+  testing: 0
+  url: https://suits-2021.herokuapp.com/api/simulation/uiastate
+  testUrl: http://localhost:3000/api/simulation/uiastate
 --- !u!1 &507068532
 GameObject:
   m_ObjectHideFlags: 0
@@ -9900,6 +10046,12 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1628086604}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1635380014 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 114105083226029953, guid: bb6fcbd6f9853314ab4ac64fa8ce6113,
+    type: 3}
+  m_PrefabInstance: {fileID: 6982571444700934159}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1674960961
 GameObject:
   m_ObjectHideFlags: 0
@@ -12559,6 +12711,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7440540671026669810, guid: bb6fcbd6f9853314ab4ac64fa8ce6113,
+        type: 3}
+      propertyPath: m_text
+      value: Biometric out of range
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bb6fcbd6f9853314ab4ac64fa8ce6113, type: 3}

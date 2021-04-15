@@ -10,11 +10,17 @@ using System;
 /// </summary>
 public class JSONParse : MonoBehaviour {
 
+    [Range(0,50000)]
+    public int testVal = 0;
+
+    public bool testing; 
+
     public string m_JSONString;
 
     [Header("Server URLS")]
     public string url = "";
     public string switchUrl = "";
+    public string testurl = ""; 
     public const int OBJECTID_LENGTH = 47;
 
     private OutputErrorData m_OutputErrorData;
@@ -87,10 +93,14 @@ public class JSONParse : MonoBehaviour {
 
     bool weCanQuit = false;
 
-    bool parsingOn = true; 
+    public bool parsingOn = true;
+
+    public static JSONParse S; 
 
     void Start ()
     {
+        S = this; 
+
         m_OutputErrorData = FindObjectOfType<OutputErrorData>();
         //StartCoroutine(RunStartWWW());
         InvokeRepeating("UpdateSystemData", 1, 5);
@@ -155,7 +165,7 @@ public class JSONParse : MonoBehaviour {
         if (!parsingOn) yield break; ; 
         if (m_bGettingSuitData == true) yield break;
 
-        using (UnityWebRequest www = UnityWebRequest.Get(url))
+        using (UnityWebRequest www = UnityWebRequest.Get(testing ? testurl : url))
         {
             yield return www.SendWebRequest();
 
@@ -207,7 +217,7 @@ public class JSONParse : MonoBehaviour {
                 timeLeftText.text = "Time Left: " + lesserTime + " (" + identifier + ")";
                 m_bGettingSuitData = false;
 
-                //m_BiometricInCautionElement.SetActive(WarningSingleton.m_Singleton.m_DataInWarning);
+                m_BiometricInCautionElement.SetActive(WarningSingleton.m_Singleton.m_DataInWarning);
 
             }
             else
@@ -226,6 +236,12 @@ public class JSONParse : MonoBehaviour {
         float waterHours = float.Parse(data.t_water.Split(':')[0]);
         float oxygenHours = float.Parse(data.t_oxygen.Split(':')[0]);
         float batteryHours = float.Parse(data.t_battery.Split(':')[0]);
+
+        if (testing)
+        {
+            data.v_fan = testVal;
+        }
+        
         CheckOffNominalRange("Internal Suit Pressure", data.p_suit, 2.0f, 4.0f, "psid");
         CheckOffNominalRange("Time Life Battery", batteryHours, 0.0f, 10.0f, "hours");
         CheckOffNominalRange("Time Life Oxygen", oxygenHours, 0.0f, 10.0f, "hours");

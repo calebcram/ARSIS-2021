@@ -649,32 +649,40 @@ public class VoiceManager : MonoBehaviour
             FieldNotesManager.s.nextQuestion();
             //mc.deselect.Invoke();
             //mc.unhighlight.Invoke(); 
+            m_Source.clip = m_NextButton;
+            m_Source.Play();
         }
         if (mc.currentMenuHit == mc.m_taskList)
         {
-            mc.currentSubTask++;
-            
-            //int maxLength = TaskManager.S.allTasks[mc.currentTask];
-            if (mc.currentSubTask > TaskManager.S.GetTask(mc.currentProcedure, mc.currentTask).SubTasks.Length - 1)
-            {
-                //if there are no more subtasks, task is complete
-                mc.currentSubTask = 0;
-                mc.currentTask++;
-
-                
-
-                    if (mc.currentTask > TaskManager.S.GetProcedure(mc.currentProcedure).Tasks.Length - 1)
-                {
-                    //when procedure is complete
-                    mc.m_blankTaskMenu.SetActive(false);  
-                    //mc.currentTask = 0;
-                    //mc.currentProcedure++;
-                }
-            }
-
-            displayStep();
+            NextStep(); 
         }
-        
+    }
+
+    public void NextStep()
+    {
+        mc.currentSubTask++;
+
+        //int maxLength = TaskManager.S.allTasks[mc.currentTask];
+        if (mc.currentSubTask > TaskManager.S.GetTask(mc.currentProcedure, mc.currentTask).SubTasks.Length - 1)
+        {
+            //if there are no more subtasks, task is complete
+            mc.currentSubTask = 0;
+            mc.currentTask++;
+
+
+
+            if (mc.currentTask > TaskManager.S.GetProcedure(mc.currentProcedure).Tasks.Length - 1)
+            {
+                //when procedure is complete
+                mc.m_blankTaskMenu.SetActive(false);
+                mc.currentProcedure = -1; 
+                mc.currentTask = 0;
+                mc.currentSubTask = 0; 
+                //mc.currentProcedure++;
+            }
+        }
+
+        displayStep();
         m_Source.clip = m_NextButton;
         m_Source.Play();
     }

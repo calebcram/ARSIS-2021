@@ -12,7 +12,7 @@ public class ProceduresMenu : MonoBehaviour
         List<Procedure> procedures = TaskManager.S.allProcedures;
         foreach (Procedure p in procedures)
         {
-            if (p.emergency) return; 
+           if (p.emergency) return; 
            for (int j = 0; j < p.Tasks.Length; j++)
            {
                 GameObject listItem = list.addListItem(p.Tasks[j].Title);

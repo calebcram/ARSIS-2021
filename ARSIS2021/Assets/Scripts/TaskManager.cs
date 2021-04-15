@@ -56,6 +56,28 @@ public class TaskManager : MonoBehaviour
         //InvokeRepeating("UpdateSystemData", 1, 5);
     }
 
+    private void LateUpdate()
+    {
+        int currentProcedure = MenuController.s.currentProcedure;
+        int currentTask = MenuController.s.currentTask;
+        int currentSubTask = MenuController.s.currentSubTask;
+
+        if (currentProcedure != 0 || currentTask == -1 || currentSubTask == -1) return;
+        if (!MenuController.s.m_blankTaskMenu.activeInHierarchy) return; // only check if the procedures menu is open
+        if (currentProcedure == 0 && currentTask == 3 && currentSubTask == 3) return; // hardcoded hack to turn off checking if we are on the congrats you are done step
+        SubTask currentSubTaskObj = allProcedures[currentProcedure].GetTask(currentTask).GetSubTask(currentSubTask);
+
+        string varToCheck = currentSubTaskObj.varName;
+        string expectedValue = currentSubTaskObj.expectedValue;
+
+        string result = UIAController.S.checkVar(varToCheck);
+
+        if (result != "" && result == expectedValue)
+        {
+            VoiceManager.S.NextStep(); 
+        }
+    }
+
     public Procedure GetProcedure(int procedureIndex)
     {
         Procedure returnVal;
@@ -297,6 +319,9 @@ public class SubTask
     public string type;
     public string warning;
     public string image;
+
+    public string varName = ""; // id of the variable to check for completeness 
+    public string expectedValue = ""; // expected value of the variable called varName when the task is complete 
 
     public Texture2D imageTex = null; 
 
