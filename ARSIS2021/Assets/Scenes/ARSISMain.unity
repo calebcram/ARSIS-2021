@@ -3819,7 +3819,7 @@ MonoBehaviour:
   testVal: 20190
   testing: 0
   m_JSONString: 
-  url: https://suits-2021.herokuapp.com/api/simulation/state
+  url: 172.20.10.3/api/simulation/state
   switchUrl: https://agile-badlands-39994.herokuapp.com/api/suitswitch/recent
   testurl: http://localhost:3000/api/simulation/state
   bioText: {fileID: 0}
@@ -3929,7 +3929,7 @@ MonoBehaviour:
     O2_vent: 
     depress_pump: 
   testing: 0
-  url: https://suits-2021.herokuapp.com/api/simulation/uiastate
+  url: 172.20.10.3/api/simulation/uiastate
   testUrl: http://localhost:3000/api/simulation/uiastate
 --- !u!1 &507068532
 GameObject:

@@ -169,10 +169,6 @@ public class MenuController : MonoBehaviour
     {
         if (currentMenuHit != null)
         {
-            if (currentMenuHit == m_newFieldNote)
-            {
-                FieldNotesManager.s.inProgress = false;
-            }
             //currentMenuHit.transform.gameObject.SetActive(false);
             FollowMeToggle followtoggle = currentMenuHit.GetComponentInParent<FollowMeToggle>();
             if (followtoggle == null) followtoggle = GetComponent<FollowMeToggle>();
